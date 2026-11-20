@@ -1,0 +1,13 @@
+{
+  "name": "atelier",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @atelier/web dev",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down"
+  }
+}
