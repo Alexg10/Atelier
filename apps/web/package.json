@@ -9,6 +9,7 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@atelier/shared": "workspace:*",
     "vue": "^3.5.46"
   },
   "devDependencies": {

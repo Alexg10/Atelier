@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* Tokens de design : chaque variable --color-xxx crée les classes bg-xxx, text-xxx, border-xxx… */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: #efefee;
+  --color-surface: #ffffff;
+  --color-ink: #141417;
+
+  --color-brand: #3d57ff;
+  --color-brand-soft: #e9ecff;
+
+  /* Réservées à la Health : jamais en décoration. */
+  --color-health-ok: #16a34a;
+  --color-health-ok-soft: #dcfce7;
+  --color-health-warning: #f97316;
+  --color-health-warning-soft: #ffedd5;
+  --color-health-fault: #dc2626;
+  --color-health-fault-soft: #fee2e2;
+}

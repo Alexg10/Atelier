@@ -140,3 +140,14 @@ Principe : **tester la logique, pas l'UI**. Viser 15 à 25 tests au total, écri
 ## Vocabulaire
 
 Le vocabulaire du domaine (Machine, Reading, Status vs Health, Alert, WorkOrder…) est défini dans `GLOSSARY.md`. Utilise ces termes dans le code et dans les explications.
+
+---
+
+## Direction visuelle
+
+Inspiration : dashboard « Finexy » (fond gris clair, cartes blanches très arrondies, navigation en pilules, gros chiffres et petits libellés gris, tableaux avec un point coloré de statut).
+
+- **Marque** : bleu `#3d57ff` (`brand`). Il sert à la carte mise en avant, aux graphes, aux liens et au focus.
+- **Actions** : noir (`ink`) pour les boutons principaux et l'onglet actif.
+- **Couleurs de Health, et rien d'autre** : vert = `ok`, orange = `warning`, rouge = `fault`. Ne jamais utiliser ces trois couleurs en décoration.
+- Les couleurs sont des tokens déclarés avec `@theme` dans `apps/web/src/style.css` : on écrit `bg-brand` et `text-health-warning` plutôt que des couleurs Tailwind brutes.

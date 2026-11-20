@@ -1,13 +1,15 @@
 <script setup lang="ts">
-// Tout ce qui est déclaré au niveau racine de <script setup> est directement utilisable dans le template.
-const appName = 'Atelier'
-const machineCount = 10
+// Un composant importé dans <script setup> est utilisable tel quel dans le template, sans déclaration.
+import MachineCard from './components/MachineCard.vue'
 </script>
 
 <template>
-  <main class="min-h-screen bg-stone-50 p-8 text-stone-800">
-    <!-- {{ }} : interpolation de texte, l'équivalent de {expr} en JSX -->
-    <h1 class="text-3xl font-semibold">{{ appName }}</h1>
-    <p class="mt-2 text-stone-500">Supervision de {{ machineCount }} machines.</p>
+  <main class="min-h-screen bg-canvas p-8 font-sans text-ink">
+    <h1 class="text-3xl font-semibold tracking-tight">Bonjour 👋</h1>
+    <p class="mt-1 text-sm text-stone-500">Suivez l'état de l'atelier, les alertes et les ordres de maintenance.</p>
+
+    <div class="mt-8">
+      <MachineCard />
+    </div>
   </main>
 </template>
