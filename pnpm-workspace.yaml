@@ -1,3 +1,9 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Paquets autorisés à exécuter leurs scripts d'installation (pnpm les bloque par défaut).
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - esbuild
+  - prisma

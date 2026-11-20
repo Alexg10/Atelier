@@ -1,0 +1,121 @@
+// Modèle de données de l'atelier. Vocabulaire : voir GLOSSARY.md à la racine.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MachineType {
+  press
+  cnc
+  conveyor
+  robot
+  oven
+}
+
+enum MachineStatus {
+  running
+  stopped
+  fault
+}
+
+enum AlertType {
+  temperature
+  vibration
+  rate
+  fault
+}
+
+enum WorkOrderStatus {
+  todo
+  in_progress
+  done
+}
+
+enum WorkOrderPriority {
+  low
+  medium
+  high
+}
+
+enum UserRole {
+  operator
+  technician
+  manager
+}
+
+model Machine {
+  id         Int         @id @default(autoincrement())
+  name       String
+  type       MachineType
+  line       String
+  /// { temperature: { max }, vibration: { max }, rate: { min } }
+  thresholds Json
+  posX       Float
+  posZ       Float
+  rotation   Float       @default(0)
+
+  readings   Reading[]
+  alerts     Alert[]
+  workOrders WorkOrder[]
+}
+
+model Reading {
+  id          Int           @id @default(autoincrement())
+  machineId   Int
+  timestamp   DateTime
+  temperature Float
+  vibration   Float
+  rate        Float
+  status      MachineStatus
+
+  machine Machine @relation(fields: [machineId], references: [id], onDelete: Cascade)
+
+  @@index([machineId, timestamp])
+}
+
+model Alert {
+  id             Int       @id @default(autoincrement())
+  machineId      Int
+  type           AlertType
+  /// Valeur qui a déclenché l'alerte (null pour une alerte de type fault).
+  value          Float?
+  createdAt      DateTime  @default(now())
+  acknowledgedAt DateTime?
+  clearedAt      DateTime?
+
+  machine   Machine    @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  workOrder WorkOrder?
+
+  @@index([machineId, clearedAt])
+}
+
+model WorkOrder {
+  id         Int               @id @default(autoincrement())
+  machineId  Int
+  alertId    Int?              @unique
+  title      String
+  priority   WorkOrderPriority @default(medium)
+  status     WorkOrderStatus   @default(todo)
+  assigneeId Int?
+  createdAt  DateTime          @default(now())
+  closedAt   DateTime?
+
+  machine  Machine @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  alert    Alert?  @relation(fields: [alertId], references: [id], onDelete: SetNull)
+  assignee User?   @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model User {
+  id   Int      @id @default(autoincrement())
+  name String
+  role UserRole
+
+  workOrders WorkOrder[]
+}

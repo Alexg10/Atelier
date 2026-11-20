@@ -35,7 +35,7 @@ Interruption subie de la production. C'est la seule défaillance qui compte pour
 _Avoid_ : arrêt, incident, défaut
 
 **Health** (santé) :
-Niveau que l'atelier déduit pour une Machine à partir de son Status et de ses Alerts ouvertes : `ok`, `warning` ou `fault`. C'est la Health qui donne la couleur de la machine, jamais le Status seul.
+Niveau que l'atelier déduit pour une Machine à partir de son Status et de ses Open alerts : `ok`, `warning` ou `fault`. C'est la Health qui donne la couleur de la machine, jamais le Status seul.
 _Avoid_ : statut, état machine
 
 ## Alertes et maintenance
@@ -45,8 +45,20 @@ Limite que la mesure d'une Machine ne doit pas franchir : un maximum pour la tem
 _Avoid_ : limite, consigne
 
 **Alert** (alerte) :
-Signal qu'une mesure d'une Machine a franchi son Threshold.
+Signal qu'une Machine a franchi un Threshold ou est tombée en Fault. Une Alert couvre tout un épisode (de l'entrée à la sortie de la situation anormale), pas un Reading isolé.
 _Avoid_ : alarme, notification, événement
+
+**Open alert** (alerte en cours) :
+Alert dont la situation anormale dure encore. Tant qu'une Machine a une Open alert, sa Health n'est pas `ok`.
+_Avoid_ : alerte active, alerte non acquittée
+
+**Acknowledge** (acquitter) :
+Geste d'un User qui signale qu'il a vu une Alert et qu'elle est prise en charge. Ça ne termine pas l'Alert.
+_Avoid_ : valider, fermer, résoudre
+
+**Clear** (retour à la normale) :
+Fin d'une Alert, constatée automatiquement quand la mesure repasse du bon côté du Threshold ou que la Machine sort de Fault.
+_Avoid_ : résoudre, fermer, acquitter
 
 **WorkOrder** (ordre de maintenance) :
 Travail de maintenance à faire sur une seule Machine. Il peut naître d'une Alert ou être créé à la main (préventif).
