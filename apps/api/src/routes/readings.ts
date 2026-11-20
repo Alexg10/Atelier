@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { readingInputSchema } from '@atelier/shared'
+import { readingInputSchema } from '@atelier/shared/schemas'
 import { prisma } from '../db.ts'
 
 export async function readingRoutes(app: FastifyInstance) {

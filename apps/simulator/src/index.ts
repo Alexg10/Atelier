@@ -1,5 +1,6 @@
 // Simulateur : récupère la liste des machines, puis envoie un relevé par machine toutes les 5 s.
-import type { MachineOverview, ReadingInput } from '@atelier/shared'
+import type { MachineOverview } from '@atelier/shared'
+import type { ReadingInput } from '@atelier/shared/schemas'
 import { createSimulatedMachine, tick } from './machine.ts'
 
 const API_URL = process.env.API_URL ?? 'http://localhost:3001'

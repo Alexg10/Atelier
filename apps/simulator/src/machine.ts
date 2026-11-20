@@ -1,6 +1,7 @@
 // Une machine simulée : elle connaît son comportement normal et produit un relevé à chaque tick.
 // Elle ne connaît ni les alertes ni la base : c'est l'API qui interprète ce qu'elle envoie.
-import { machineProfiles, type MachineStatus, type MachineType, type ReadingInput } from '@atelier/shared'
+import { machineProfiles, type MachineStatus, type MachineType } from '@atelier/shared'
+import type { ReadingInput } from '@atelier/shared/schemas'
 
 /** Probabilités par tick (un tick = 5 s) de voir démarrer chaque événement. */
 const CHANCE_PER_TICK = {

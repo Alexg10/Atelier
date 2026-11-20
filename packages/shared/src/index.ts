@@ -45,4 +45,3 @@ export function computeHealth(status: MachineStatus | undefined, openAlertCount:
 }
 
 export * from './profiles.ts'
-export * from './schemas.ts'
