@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch, watchEffect } from 'vue'
+import { storeToRefs } from 'pinia'
 import type { MachineHealth } from '@atelier/shared'
 import FilterPill from '../components/FilterPill.vue'
-import LiveIndicator from '../components/LiveIndicator.vue'
 import MachineGrid from '../components/MachineGrid.vue'
 import MachineGridSkeleton from '../components/MachineGridSkeleton.vue'
 import StatCard from '../components/StatCard.vue'
-import { useMachines } from '../composables/useMachines'
+import { useMachinesStore } from '../stores/machines'
 
-// Déstructurer est sûr ici : chaque propriété renvoyée est une ref.
-// live : plus de polling, les machines arrivent par le flux SSE dès qu'elles changent.
-const { machines, loading, error, lastUpdatedAt, refresh, streamStatus } = useMachines({ live: true })
+const machinesStore = useMachinesStore()
+// Le store est un objet reactive : le déstructurer directement casserait la réactivité.
+// storeToRefs extrait le state en refs (les actions, elles, s'appellent directement sur le store).
+const { machines, loading, error, lastUpdatedAt } = storeToRefs(machinesStore)
+const refresh = () => machinesStore.load()
 
 // Premier chargement : rien à montrer encore. Lors d'une actualisation, on garde la grille affichée.
 const isFirstLoad = computed(() => loading.value && machines.value.length === 0)
@@ -112,7 +114,6 @@ function toggleHealthFilter(health: MachineHealth) {
       <p class="mt-1 text-sm text-stone-500">Suivez l'état de l'atelier, les alertes et les ordres de maintenance.</p>
     </div>
     <div class="flex items-center gap-3">
-      <LiveIndicator v-if="streamStatus" :status="streamStatus" />
       <span v-if="lastUpdatedAt" class="text-xs text-stone-400">
         Mis à jour à {{ lastUpdatedAt.toLocaleTimeString('fr-FR') }}
       </span>

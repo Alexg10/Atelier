@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { watchEffect } from 'vue'
+import { computed, watchEffect } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import HealthBadge from '../components/HealthBadge.vue'
 import MachineMetrics from '../components/MachineMetrics.vue'
-import { useMachine } from '../composables/useMachine'
-import { useMachines } from '../composables/useMachines'
+import { useMachinesStore } from '../stores/machines'
 
 // Grâce à l'option props de la route, l'id arrive en prop (déjà converti en nombre) au lieu d'être lu dans useRoute().
 const props = defineProps<{
   id: number
 }>()
 
-// On passe un getter, pas props.id : sinon le composable recevrait le nombre du premier rendu et ne verrait jamais le changement.
-const { machine, loading, error } = useMachine(() => props.id)
+// Même store que le dashboard : la liste est déjà en mémoire, et chaque événement SSE met aussi cette fiche à jour.
+const machinesStore = useMachinesStore()
+const { machines, loading, error, machineById } = storeToRefs(machinesStore)
 
-// La liste sert seulement au sélecteur : pas de polling ici.
-const { machines } = useMachines()
+// computed sur props.id : changer de machine dans le sélecteur recalcule simplement la valeur, sans nouvel appel réseau.
+const machine = computed(() => machineById.value.get(props.id) ?? null)
+
+// Introuvable seulement une fois la liste chargée (sinon on afficherait l'erreur pendant le premier chargement).
+const notFound = computed(() => !loading.value && machines.value.length > 0 && !machine.value)
 
 // useRouter donne l'instance du routeur, pour naviguer depuis le code (useRoute, lui, décrit la route courante).
 const router = useRouter()
@@ -49,12 +53,17 @@ watchEffect(() => {
     </label>
   </div>
 
-  <div v-if="error" role="alert" class="mt-6 rounded-3xl bg-surface p-5 text-sm">
+  <div v-if="notFound" role="alert" class="mt-6 rounded-3xl bg-surface p-5 text-sm">
     <p class="font-medium text-ink">Machine introuvable</p>
+    <p class="mt-0.5 text-stone-500">Aucune machine ne porte le numéro {{ id }}.</p>
+  </div>
+
+  <div v-else-if="error && !machine" role="alert" class="mt-6 rounded-3xl bg-surface p-5 text-sm">
+    <p class="font-medium text-ink">Données indisponibles</p>
     <p class="mt-0.5 text-stone-500">{{ error }}</p>
   </div>
 
-  <div v-else-if="loading && !machine" class="mt-6 h-40 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
+  <div v-else-if="!machine" class="mt-6 h-40 animate-pulse rounded-3xl bg-surface" aria-hidden="true" />
 
   <template v-else-if="machine">
     <div class="mt-4 flex flex-wrap items-center gap-3">

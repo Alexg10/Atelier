@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { StreamStatus } from '../composables/useMachineStream'
+import type { StreamStatus } from '../api/machineStream'
 
 const props = defineProps<{
   status: StreamStatus

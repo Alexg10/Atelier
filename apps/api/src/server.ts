@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import { prisma } from './db.ts'
+import { alertRoutes } from './routes/alerts.ts'
 import { machineRoutes } from './routes/machines.ts'
 import { readingRoutes } from './routes/readings.ts'
 import { streamRoutes } from './routes/stream.ts'
@@ -14,6 +15,7 @@ app.get('/health', async () => {
 // Chaque groupe de routes est un plugin Fastify, enregistré ici.
 await app.register(machineRoutes)
 await app.register(readingRoutes)
+await app.register(alertRoutes)
 await app.register(streamRoutes)
 
 const port = Number(process.env.API_PORT ?? 3001)
