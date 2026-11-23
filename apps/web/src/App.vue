@@ -1,6 +1,19 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { RouterView } from 'vue-router'
+import LiveIndicator from './components/LiveIndicator.vue'
 import NavLink from './components/NavLink.vue'
+import { useAlertsStore } from './stores/alerts'
+import { useLiveStore } from './stores/live'
+
+const liveStore = useLiveStore()
+const { status: streamStatus } = storeToRefs(liveStore)
+const { openCount } = storeToRefs(useAlertsStore())
+
+// App.vue vit aussi longtemps que l'application : c'est le bon endroit pour une connexion qui doit survivre à la navigation.
+onMounted(liveStore.start)
+onUnmounted(liveStore.stop)
 </script>
 
 <template>
@@ -17,7 +30,18 @@ import NavLink from './components/NavLink.vue'
         <NavLink :to="{ name: 'work-orders' }" label="Ordres de maintenance" />
       </nav>
 
-      <span class="grid size-9 place-items-center rounded-full bg-surface text-xs font-semibold text-stone-500">CM</span>
+      <div class="flex items-center gap-3">
+        <LiveIndicator :status="streamStatus" />
+        <span
+          class="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-xs font-medium"
+          :class="openCount > 0 ? 'text-ink' : 'text-stone-400'"
+          :aria-label="`${openCount} alerte(s) en cours`"
+        >
+          <span aria-hidden="true">🔔</span>
+          {{ openCount }}
+        </span>
+        <span class="grid size-9 place-items-center rounded-full bg-surface text-xs font-semibold text-stone-500">CM</span>
+      </div>
     </header>
 
     <main class="p-8">

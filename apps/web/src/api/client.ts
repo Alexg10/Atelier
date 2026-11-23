@@ -1,5 +1,5 @@
 // Client HTTP minimal : un seul endroit pour l'URL de base et la gestion des erreurs.
-import type { MachineOverview } from '@atelier/shared'
+import type { AlertSummary, MachineOverview } from '@atelier/shared'
 
 const BASE_URL = '/api'
 const UNREACHABLE_MESSAGE = "Le serveur de l'atelier ne répond pas. Vérifiez que l'API est démarrée."
@@ -34,3 +34,4 @@ async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export const fetchMachines = (signal?: AbortSignal) => apiGet<MachineOverview[]>('/machines', signal)
 export const fetchMachine = (id: number, signal?: AbortSignal) => apiGet<MachineOverview>(`/machines/${id}`, signal)
+export const fetchOpenAlerts = (signal?: AbortSignal) => apiGet<AlertSummary[]>('/alerts?open=true', signal)
