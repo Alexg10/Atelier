@@ -34,6 +34,18 @@ function formatStart(iso: string) {
       <span class="shrink-0 text-xs" :class="alert.clearedAt ? 'text-stone-500' : 'font-medium text-ink'">
         {{ alert.clearedAt ? formatDuration(alert.createdAt, alert.clearedAt) : 'En cours' }}
       </span>
+      <!-- Une alerte en cours, pas encore prise en charge : lien vers le formulaire prérempli par la query. -->
+      <RouterLink
+        v-if="!alert.clearedAt && !alert.acknowledgedAt"
+        :to="{
+          name: 'work-order-new',
+          query: { machine: alert.machineId, alert: alert.id, title: alertTypeLabels[alert.type] },
+        }"
+        class="shrink-0 rounded-full bg-ink px-3 py-1 text-xs font-medium text-white transition hover:bg-ink/85"
+      >
+        Créer un ordre
+      </RouterLink>
+      <span v-else-if="!alert.clearedAt" class="shrink-0 text-xs text-stone-400">Prise en charge</span>
     </li>
   </ol>
 </template>

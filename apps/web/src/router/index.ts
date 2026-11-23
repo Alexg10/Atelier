@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type LocationQueryValue } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
 
 // On déclare les champs autorisés dans meta : TypeScript vérifie alors chaque route et chaque lecture de to.meta.
@@ -6,6 +6,11 @@ declare module 'vue-router' {
   interface RouteMeta {
     title?: string
   }
+}
+
+function positiveInt(value: LocationQueryValue | LocationQueryValue[] | undefined): number | undefined {
+  const number = Number(value)
+  return typeof value === 'string' && Number.isInteger(number) && number > 0 ? number : undefined
 }
 
 export const router = createRouter({
@@ -39,6 +44,18 @@ export const router = createRouter({
       name: 'work-orders',
       component: () => import('../views/WorkOrdersView.vue'),
       meta: { title: 'Ordres de maintenance' },
+    },
+    {
+      path: '/work-orders/new',
+      name: 'work-order-new',
+      component: () => import('../views/WorkOrderNewView.vue'),
+      // La query devient des props typées ; une valeur absente ou invalide est simplement ignorée.
+      props: (route) => ({
+        machineId: positiveInt(route.query.machine),
+        alertId: positiveInt(route.query.alert),
+        title: typeof route.query.title === 'string' ? route.query.title : undefined,
+      }),
+      meta: { title: 'Nouvel ordre de maintenance' },
     },
     // Toute URL inconnue : le paramètre pathMatch capture le chemin entier.
     {
