@@ -84,3 +84,36 @@ export type ReadingHistory = {
   bucketSeconds: number
   buckets: ReadingBucket[]
 }
+
+export const workOrderStatuses = ['todo', 'in_progress', 'done'] as const
+export type WorkOrderStatus = (typeof workOrderStatuses)[number]
+export const workOrderPriorities = ['low', 'medium', 'high'] as const
+export type WorkOrderPriority = (typeof workOrderPriorities)[number]
+export type UserRole = 'operator' | 'technician' | 'manager'
+
+export type UserSummary = { id: number; name: string; role: UserRole }
+
+/** Un ordre de maintenance tel que le front le reçoit (avec le nom de la machine et de l'Assignee, pour la liste). */
+export type WorkOrderSummary = {
+  id: number
+  machineId: number
+  machineName: string
+  alertId: number | null
+  title: string
+  priority: WorkOrderPriority
+  status: WorkOrderStatus
+  assignee: UserSummary | null
+  createdAt: string
+  closedAt: string | null
+}
+
+/** Cycle de vie : à faire ⇄ en cours → terminé. Un ordre terminé ne bouge plus. */
+const workOrderTransitions: Record<WorkOrderStatus, WorkOrderStatus[]> = {
+  todo: ['in_progress', 'done'],
+  in_progress: ['todo', 'done'],
+  done: [],
+}
+
+export function canTransition(from: WorkOrderStatus, to: WorkOrderStatus): boolean {
+  return from === to || workOrderTransitions[from].includes(to)
+}
