@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { MachineHealth, MachineOverview } from '@atelier/shared'
 import { buildMetrics } from '../utils/metrics'
 
@@ -12,6 +13,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   select: [machineId: number]
 }>()
+
+// computed lit props.machine : quand le parent envoie une machine mise à jour, metrics se recalcule.
+const metrics = computed(() => buildMetrics(props.machine))
 
 const healthLabels: Record<MachineHealth, string> = {
   ok: 'OK',
@@ -64,8 +68,8 @@ const healthDotClasses: Record<MachineHealth, string> = {
 
     <template v-if="machine.lastReading">
       <dl class="mt-4 grid grid-cols-3 gap-2">
-        <!-- Appelée dans le template, la fonction est réévaluée à chaque rendu : elle suit la prop. -->
-        <div v-for="metric in buildMetrics(props.machine)" :key="metric.key" class="rounded-2xl bg-canvas/60 p-3">
+        <!-- metrics est un computed : déballé dans le template comme une ref (pas de .value) -->
+        <div v-for="metric in metrics" :key="metric.key" class="rounded-2xl bg-canvas/60 p-3">
           <dt class="text-xs text-stone-400">{{ metric.label }}</dt>
           <dd class="mt-1 text-xl font-semibold" :class="{ 'text-health-warning': metric.outOfRange }">
             {{ metric.value }}
