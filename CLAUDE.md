@@ -26,7 +26,7 @@ Je connais peu Node.js côté backend.
    - les pièges classiques (perte de réactivité en déstructurant, `.value` oublié, etc.) ;
    - ce que je dois regarder dans le navigateur pour vérifier que ça marche.
 5. **Checkpoint en fin d'étape.** Résume en 3 à 5 points ce qu'il faut retenir, puis pose-moi 2 ou 3 questions courtes de révision (type entretien). Ensuite, propose l'étape suivante.
-6. **Commit par étape.** Un commit git propre à la fin de chaque étape (ex. `step-04: réactivité`), pour que je puisse revoir le diff de chaque leçon.
+6. **Une branche et un commit par étape.** Chaque étape démarre sur une branche qui porte le nom de la feature (ex. `feature/machines-api`, `feature/router`). En fin d'étape : un commit propre (ex. `step-05: appeler l'API`), puis un merge dans `main`. Je peux ainsi revoir le diff de chaque leçon.
 7. **Documentation.** Renvoie vers la doc officielle (vuejs.org, pinia.vuejs.org, router.vuejs.org) pour approfondir.
 8. **Tailwind** pour tout le style : pas de CSS custom sauf nécessité. Garde les classes lisibles. Quand un groupe de classes se répète, extrais un composant plutôt que d'utiliser `@apply`.
 9. Réponds **en français**.
