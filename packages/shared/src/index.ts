@@ -65,3 +65,22 @@ export type StreamEvents = {
   'alert-opened': AlertSummary
   'alert-cleared': AlertSummary
 }
+
+/** Périodes proposées sur la fiche machine. */
+export const readingRanges = ['1h', '24h', '7d'] as const
+export type ReadingRange = (typeof readingRanges)[number]
+
+/** Moyenne des relevés d'une machine sur un intervalle (« bucket ») de temps. null : aucun relevé reçu pendant l'intervalle. */
+export type ReadingBucket = {
+  timestamp: string
+  temperature: number | null
+  vibration: number | null
+  rate: number | null
+}
+
+export type ReadingHistory = {
+  range: ReadingRange
+  /** Durée de chaque bucket, en secondes. */
+  bucketSeconds: number
+  buckets: ReadingBucket[]
+}
