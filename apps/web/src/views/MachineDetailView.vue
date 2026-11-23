@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router'
 import { readingRanges, type ReadingBucket, type ReadingRange } from '@atelier/shared'
 import { fetchMachineAlerts, fetchReadingHistory } from '../api/client'
 import AlertHistory from '../components/AlertHistory.vue'
+import BaseTabPanel from '../components/ui/BaseTabPanel.vue'
+import BaseTabs from '../components/ui/BaseTabs.vue'
 import FilterPill from '../components/FilterPill.vue'
 import HealthBadge from '../components/HealthBadge.vue'
 import MachineMetrics from '../components/MachineMetrics.vue'
@@ -27,6 +29,14 @@ const machine = computed(() => machineById.value.get(props.id) ?? null)
 
 // Introuvable seulement une fois la liste chargée (sinon on afficherait l'erreur pendant le premier chargement).
 const notFound = computed(() => !loading.value && machines.value.length > 0 && !machine.value)
+
+// Onglet affiché sous le dernier relevé.
+const tab = ref<'history' | 'alerts'>('history')
+const tabs = computed(() => [
+  { id: 'history', label: 'Historique' },
+  // Le compteur vient de la machine (poussée par le SSE) : il bouge en direct.
+  { id: 'alerts', label: 'Alertes', count: machine.value?.openAlertCount },
+])
 
 // Période des courbes : état local, seul cet écran s'en sert.
 const range = ref<ReadingRange>('24h')
@@ -120,46 +130,47 @@ watchEffect(() => {
     </div>
     <p class="mt-1 text-sm text-stone-500">{{ machine.line }} · {{ machine.type }}</p>
 
-    <div class="mt-8 grid gap-4 lg:grid-cols-2">
-      <section class="rounded-3xl bg-surface p-5">
-        <h2 class="text-sm font-medium text-stone-500">Dernier relevé</h2>
-        <MachineMetrics v-if="machine.lastReading" :machine="machine" class="mt-3" />
-        <p v-else class="mt-3 text-sm italic text-stone-400">Aucun relevé reçu</p>
-      </section>
+    <section class="mt-8 max-w-xl rounded-3xl bg-surface p-5">
+      <h2 class="text-sm font-medium text-stone-500">Dernier relevé</h2>
+      <MachineMetrics v-if="machine.lastReading" :machine="machine" class="mt-3" />
+      <p v-else class="mt-3 text-sm italic text-stone-400">Aucun relevé reçu</p>
+    </section>
 
-      <section class="rounded-3xl bg-surface p-5">
-        <h2 class="text-sm font-medium text-stone-500">Alertes récentes</h2>
-        <p v-if="alertHistoryError" role="alert" class="mt-3 text-sm text-stone-500">{{ alertHistoryError }}</p>
-        <div v-else-if="alertHistory" class="mt-1 max-h-64 overflow-y-auto">
-          <AlertHistory :alerts="alertHistory" />
+    <!-- BaseTabs fournit l'onglet actif (provide) ; chaque BaseTabPanel l'injecte pour savoir s'il doit s'afficher. -->
+    <BaseTabs v-model="tab" :tabs="tabs" class="mt-8">
+      <BaseTabPanel id="history">
+        <div class="flex rounded-full bg-surface p-1 sm:w-fit">
+          <FilterPill
+            v-for="option in readingRanges"
+            :key="option"
+            :label="rangeLabels[option]"
+            :active="range === option"
+            @click="range = option"
+          />
         </div>
-      </section>
-    </div>
 
-    <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
-      <h2 class="text-xl font-semibold tracking-tight">Historique</h2>
-      <div class="flex rounded-full bg-surface p-1">
-        <FilterPill
-          v-for="option in readingRanges"
-          :key="option"
-          :label="rangeLabels[option]"
-          :active="range === option"
-          @click="range = option"
-        />
-      </div>
-    </div>
+        <p v-if="historyError" role="alert" class="mt-4 rounded-3xl bg-surface p-5 text-sm text-stone-500">
+          {{ historyError }}
+        </p>
 
-    <p v-if="historyError" role="alert" class="mt-4 rounded-3xl bg-surface p-5 text-sm text-stone-500">{{ historyError }}</p>
-
-    <div v-else class="mt-4 grid gap-4 xl:grid-cols-3">
-      <section v-for="chart in charts" :key="chart.metric" class="rounded-3xl bg-surface p-5">
-        <h3 class="text-sm font-medium text-stone-500">{{ chart.title }} ({{ chart.unit }})</h3>
-        <!-- Pendant un rechargement, on garde l'ancienne courbe (atténuée) plutôt que de la faire disparaître. -->
-        <div v-if="history" class="mt-4 transition-opacity" :class="{ 'opacity-50': historyLoading }">
-          <MetricChart :history="history" :metric="chart.metric" :unit="chart.unit" :threshold="chart.threshold" />
+        <div v-else class="mt-4 grid gap-4 xl:grid-cols-3">
+          <section v-for="chart in charts" :key="chart.metric" class="rounded-3xl bg-surface p-5">
+            <h3 class="text-sm font-medium text-stone-500">{{ chart.title }} ({{ chart.unit }})</h3>
+            <!-- Pendant un rechargement, on garde l'ancienne courbe (atténuée) plutôt que de la faire disparaître. -->
+            <div v-if="history" class="mt-4 transition-opacity" :class="{ 'opacity-50': historyLoading }">
+              <MetricChart :history="history" :metric="chart.metric" :unit="chart.unit" :threshold="chart.threshold" />
+            </div>
+            <div v-else class="mt-4 h-56 animate-pulse rounded-2xl bg-canvas" aria-hidden="true" />
+          </section>
         </div>
-        <div v-else class="mt-4 h-56 animate-pulse rounded-2xl bg-canvas" aria-hidden="true" />
-      </section>
-    </div>
+      </BaseTabPanel>
+
+      <BaseTabPanel id="alerts">
+        <section class="max-w-3xl rounded-3xl bg-surface p-5">
+          <p v-if="alertHistoryError" role="alert" class="text-sm text-stone-500">{{ alertHistoryError }}</p>
+          <AlertHistory v-else-if="alertHistory" :alerts="alertHistory" />
+        </section>
+      </BaseTabPanel>
+    </BaseTabs>
   </template>
 </template>

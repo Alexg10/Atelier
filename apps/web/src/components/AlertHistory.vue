@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AlertSummary } from '@atelier/shared'
+import BaseBadge from './ui/BaseBadge.vue'
 import { alertTypeLabels, formatDuration, formatTriggeringValue } from '../utils/alerts'
 
 defineProps<{
@@ -45,7 +46,7 @@ function formatStart(iso: string) {
       >
         Créer un ordre
       </RouterLink>
-      <span v-else-if="!alert.clearedAt" class="shrink-0 text-xs text-stone-400">Prise en charge</span>
+      <BaseBadge v-else-if="!alert.clearedAt" class="shrink-0">Prise en charge</BaseBadge>
     </li>
   </ol>
 </template>
