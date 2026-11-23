@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch, watchEffect } from 'vue'
-import type { MachineHealth, MachineOverview } from '@atelier/shared'
+import type { MachineHealth } from '@atelier/shared'
 import FilterPill from '../components/FilterPill.vue'
 import MachineGrid from '../components/MachineGrid.vue'
+import MachineGridSkeleton from '../components/MachineGridSkeleton.vue'
 import StatCard from '../components/StatCard.vue'
-import { machineFixtures } from '../fixtures/machines'
+import { useMachines } from '../composables/useMachines'
 
-const machines: MachineOverview[] = machineFixtures
+// Déstructurer est sûr ici : chaque propriété renvoyée est une ref.
+const { machines, loading, error, lastUpdatedAt, refresh } = useMachines({ pollInterval: 5000 })
+
+// Premier chargement : rien à montrer encore. Lors d'une actualisation, on garde la grille affichée.
+const isFirstLoad = computed(() => loading.value && machines.value.length === 0)
 
 type Preferences = {
   line: 'all' | string
@@ -62,10 +67,10 @@ const healthOptions: { value: 'all' | MachineHealth; label: string }[] = [
 const healthSeverity: Record<MachineHealth, number> = { fault: 0, warning: 1, ok: 2 }
 
 // computed : valeur dérivée, recalculée seulement quand filters ou sortBy changent, et mise en cache sinon.
-const lines = computed(() => [...new Set(machines.map((machine) => machine.line))])
+const lines = computed(() => [...new Set(machines.value.map((machine) => machine.line))])
 
 const visibleMachines = computed(() =>
-  machines
+  machines.value
     .filter((machine) => filters.line === 'all' || machine.line === filters.line)
     .filter((machine) => filters.health === 'all' || machine.health === filters.health)
     .toSorted((a, b) =>
@@ -78,12 +83,14 @@ const visibleMachines = computed(() =>
 // Les compteurs portent sur tout l'atelier, pas sur la liste filtrée : ils ne bougent pas quand on filtre.
 const healthCounts = computed(() => {
   const counts: Record<MachineHealth, number> = { ok: 0, warning: 0, fault: 0 }
-  for (const machine of machines) counts[machine.health]++
+  for (const machine of machines.value) counts[machine.health]++
   return counts
 })
 
-const runningCount = computed(() => machines.filter((machine) => machine.lastReading?.status === 'running').length)
-const runningShare = computed(() => Math.round((runningCount.value / machines.length) * 100))
+const runningCount = computed(() => machines.value.filter((machine) => machine.lastReading?.status === 'running').length)
+const runningShare = computed(() =>
+  machines.value.length === 0 ? 0 : Math.round((runningCount.value / machines.value.length) * 100),
+)
 
 // watchEffect : exécuté tout de suite, puis à chaque changement de ce qu'il lit (dépendances automatiques).
 watchEffect(() => {
@@ -102,8 +109,47 @@ function onSelect(machineId: number) {
 </script>
 
 <template>
-  <h1 class="text-3xl font-semibold tracking-tight">Bonjour 👋</h1>
-  <p class="mt-1 text-sm text-stone-500">Suivez l'état de l'atelier, les alertes et les ordres de maintenance.</p>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight">Bonjour 👋</h1>
+      <p class="mt-1 text-sm text-stone-500">Suivez l'état de l'atelier, les alertes et les ordres de maintenance.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span v-if="lastUpdatedAt" class="text-xs text-stone-400">
+        Mis à jour à {{ lastUpdatedAt.toLocaleTimeString('fr-FR') }}
+      </span>
+      <!-- :disabled évite de lancer deux chargements en parallèle -->
+      <button
+        type="button"
+        class="rounded-full bg-ink px-4 py-2 text-sm font-medium text-white transition hover:bg-ink/85 disabled:opacity-50"
+        :disabled="loading"
+        @click="refresh"
+      >
+        {{ loading ? 'Actualisation…' : 'Actualiser' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- role="alert" : le message est annoncé par les lecteurs d'écran dès qu'il apparaît -->
+  <div
+    v-if="error"
+    role="alert"
+    class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-surface p-5 text-sm"
+  >
+    <div>
+      <p class="font-medium text-ink">Données indisponibles</p>
+      <p class="mt-0.5 text-stone-500">
+        {{ error }}<template v-if="machines.length > 0"> · Les données affichées sont celles de la dernière mise à jour.</template>
+      </p>
+    </div>
+    <button
+      type="button"
+      class="rounded-full border border-stone-200 px-4 py-2 font-medium text-ink transition hover:bg-stone-50"
+      @click="refresh"
+    >
+      Réessayer
+    </button>
+  </div>
 
   <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     <StatCard
@@ -169,6 +215,7 @@ function onSelect(machineId: number) {
   </p>
 
   <section class="mt-3">
-    <MachineGrid :machines="visibleMachines" :selected-id="selectedId" @select="onSelect" />
+    <MachineGridSkeleton v-if="isFirstLoad" />
+    <MachineGrid v-else :machines="visibleMachines" :selected-id="selectedId" @select="onSelect" />
   </section>
 </template>
