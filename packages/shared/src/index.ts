@@ -45,3 +45,23 @@ export function computeHealth(status: MachineStatus | undefined, openAlertCount:
 }
 
 export * from './profiles.ts'
+
+export type AlertType = 'temperature' | 'vibration' | 'rate' | 'fault'
+
+/** Une alerte telle que le front la reçoit (dates en ISO). */
+export type AlertSummary = {
+  id: number
+  machineId: number
+  type: AlertType
+  value: number | null
+  createdAt: string
+  acknowledgedAt: string | null
+  clearedAt: string | null
+}
+
+/** Événements poussés par l'API sur le flux temps réel (nom de l'événement → contenu). */
+export type StreamEvents = {
+  machine: MachineOverview
+  'alert-opened': AlertSummary
+  'alert-cleared': AlertSummary
+}
