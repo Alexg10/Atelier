@@ -34,7 +34,6 @@ function loadPreferences(): Preferences {
 const saved = loadPreferences()
 
 // ref : une valeur réactive unique, lue et écrite via .value dans le script.
-const selectedId = ref<number | null>(null)
 const sortBy = ref(saved.sortBy)
 
 // reactive : un objet réactif dont on modifie directement les propriétés (pas de .value).
@@ -95,16 +94,12 @@ const runningShare = computed(() =>
 // watchEffect : exécuté tout de suite, puis à chaque changement de ce qu'il lit (dépendances automatiques).
 watchEffect(() => {
   const problems = healthCounts.value.warning + healthCounts.value.fault
-  document.title = problems > 0 ? `(${problems}) Atelier` : 'Atelier'
+  document.title = problems > 0 ? `(${problems}) Tableau de bord · Atelier` : 'Tableau de bord · Atelier'
 })
 
 // Cliquer sur un compteur filtre la grille sur cette Health ; recliquer retire le filtre.
 function toggleHealthFilter(health: MachineHealth) {
   filters.health = filters.health === health ? 'all' : health
-}
-
-function onSelect(machineId: number) {
-  selectedId.value = selectedId.value === machineId ? null : machineId
 }
 </script>
 
@@ -216,6 +211,6 @@ function onSelect(machineId: number) {
 
   <section class="mt-3">
     <MachineGridSkeleton v-if="isFirstLoad" />
-    <MachineGrid v-else :machines="visibleMachines" :selected-id="selectedId" @select="onSelect" />
+    <MachineGrid v-else :machines="visibleMachines" />
   </section>
 </template>

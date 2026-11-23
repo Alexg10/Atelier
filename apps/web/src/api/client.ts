@@ -33,3 +33,4 @@ async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
 }
 
 export const fetchMachines = (signal?: AbortSignal) => apiGet<MachineOverview[]>('/machines', signal)
+export const fetchMachine = (id: number, signal?: AbortSignal) => apiGet<MachineOverview>(`/machines/${id}`, signal)
