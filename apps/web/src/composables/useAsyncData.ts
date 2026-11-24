@@ -1,4 +1,4 @@
-import { onUnmounted, ref, shallowRef, watch, type WatchSource } from 'vue'
+import { onScopeDispose, ref, shallowRef, watch, type WatchSource } from 'vue'
 
 /**
  * Charge une donnée qui dépend d'une source réactive (id, période…) et la recharge quand cette source change.
@@ -37,7 +37,8 @@ export function useAsyncData<Source, Data>(
 
   watch(source, load, { immediate: true })
 
-  onUnmounted(() => currentRequest?.abort())
+  // onScopeDispose plutôt qu'onUnmounted : appelé au démontage d'un composant ET à l'arrêt d'un effectScope (tests, stores).
+  onScopeDispose(() => currentRequest?.abort())
 
   return { data, loading, error }
 }

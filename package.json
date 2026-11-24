@@ -1,6 +1,7 @@
 {
   "name": "atelier",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.28.2",
   "engines": {
     "node": ">=22.12.0"
@@ -11,6 +12,11 @@
     "dev:sim": "pnpm --filter @atelier/simulator dev",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
-    "db:seed": "pnpm --filter @atelier/api db:seed"
+    "db:seed": "pnpm --filter @atelier/api db:seed",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.1"
   }
 }
