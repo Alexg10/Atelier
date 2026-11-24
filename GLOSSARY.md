@@ -38,6 +38,20 @@ _Avoid_ : arrêt, incident, défaut
 Niveau que l'atelier déduit pour une Machine à partir de son Status et de ses Open alerts : `ok`, `warning` ou `fault`. C'est la Health qui donne la couleur de la machine, jamais le Status seul.
 _Avoid_ : statut, état machine
 
+## Indicateurs
+
+**OEE** (TRS, taux de rendement synthétique) :
+Disponibilité × performance × qualité d'une Machine sur une période. La disponibilité est la part du temps en `running` (un Stop et une Fault sont tous deux des pertes) ; la performance est la Rate moyenne en marche rapportée à la Rate nominale ; la qualité est supposée à 100 % (la télémétrie ne remonte pas les rebuts).
+_Avoid_ : rendement, efficacité
+
+**MTBF** (temps moyen entre pannes) :
+Temps de marche divisé par le nombre de Faults. Les Stops n'y entrent pas.
+_Avoid_ : fiabilité (trop vague)
+
+**MTTR** (temps moyen de réparation) :
+Durée totale en Fault divisée par le nombre de Faults.
+_Avoid_ : temps d'arrêt, downtime
+
 ## Alertes et maintenance
 
 **Threshold** (seuil) :

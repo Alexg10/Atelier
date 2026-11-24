@@ -2,15 +2,15 @@
 import { computed, ref, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import { readingRanges, type ReadingBucket, type ReadingRange } from '@atelier/shared'
+import type { ReadingBucket, ReadingRange } from '@atelier/shared'
 import { fetchMachineAlerts, fetchReadingHistory } from '../api/client'
 import AlertHistory from '../components/AlertHistory.vue'
 import BaseTabPanel from '../components/ui/BaseTabPanel.vue'
 import BaseTabs from '../components/ui/BaseTabs.vue'
-import FilterPill from '../components/FilterPill.vue'
 import HealthBadge from '../components/HealthBadge.vue'
 import MachineMetrics from '../components/MachineMetrics.vue'
 import MetricChart from '../components/MetricChart.vue'
+import RangePills from '../components/RangePills.vue'
 import { useAsyncData } from '../composables/useAsyncData'
 import { useAlertsStore } from '../stores/alerts'
 import { useMachinesStore } from '../stores/machines'
@@ -40,7 +40,6 @@ const tabs = computed(() => [
 
 // Période des courbes : état local, seul cet écran s'en sert.
 const range = ref<ReadingRange>('24h')
-const rangeLabels: Record<ReadingRange, string> = { '1h': '1 h', '24h': '24 h', '7d': '7 jours' }
 
 // Source tableau : on recharge si la machine OU la période change (un getter pour la prop, la ref pour la période).
 const {
@@ -139,15 +138,7 @@ watchEffect(() => {
     <!-- BaseTabs fournit l'onglet actif (provide) ; chaque BaseTabPanel l'injecte pour savoir s'il doit s'afficher. -->
     <BaseTabs v-model="tab" :tabs="tabs" class="mt-8">
       <BaseTabPanel id="history">
-        <div class="flex rounded-full bg-surface p-1 sm:w-fit">
-          <FilterPill
-            v-for="option in readingRanges"
-            :key="option"
-            :label="rangeLabels[option]"
-            :active="range === option"
-            @click="range = option"
-          />
-        </div>
+        <RangePills v-model="range" />
 
         <p v-if="historyError" role="alert" class="mt-4 rounded-3xl bg-surface p-5 text-sm text-stone-500">
           {{ historyError }}

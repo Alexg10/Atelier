@@ -1,6 +1,7 @@
 import Fastify from 'fastify'
 import { prisma } from './db.ts'
 import { alertRoutes } from './routes/alerts.ts'
+import { kpiRoutes } from './routes/kpis.ts'
 import { machineRoutes } from './routes/machines.ts'
 import { readingRoutes } from './routes/readings.ts'
 import { streamRoutes } from './routes/stream.ts'
@@ -23,6 +24,7 @@ export async function buildApp({ logger = true } = {}) {
   await app.register(streamRoutes)
   await app.register(userRoutes)
   await app.register(workOrderRoutes)
+  await app.register(kpiRoutes)
 
   return app
 }

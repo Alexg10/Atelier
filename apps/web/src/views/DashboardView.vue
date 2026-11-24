@@ -5,6 +5,7 @@ import type { MachineHealth } from '@atelier/shared'
 import FilterPill from '../components/FilterPill.vue'
 import MachineGrid from '../components/MachineGrid.vue'
 import MachineGridSkeleton from '../components/MachineGridSkeleton.vue'
+import PlantKpis from '../components/PlantKpis.vue'
 import StatCard from '../components/StatCard.vue'
 import { useMachinesStore } from '../stores/machines'
 
@@ -217,4 +218,6 @@ function toggleHealthFilter(health: MachineHealth) {
     <MachineGridSkeleton v-if="isFirstLoad" />
     <MachineGrid v-else :machines="visibleMachines" />
   </section>
+
+  <PlantKpis />
 </template>

@@ -1,6 +1,7 @@
 // Client HTTP minimal : un seul endroit pour l'URL de base et la gestion des erreurs.
 import type {
   AlertSummary,
+  KpiReport,
   MachineOverview,
   ReadingHistory,
   ReadingRange,
@@ -73,6 +74,7 @@ export const fetchReadingHistory = (id: number, range: ReadingRange, signal?: Ab
   apiGet<ReadingHistory>(`/machines/${id}/readings?range=${range}`, signal)
 export const fetchMachineAlerts = (machineId: number, signal?: AbortSignal) =>
   apiGet<AlertSummary[]>(`/alerts?machineId=${machineId}`, signal)
+export const fetchKpis = (range: ReadingRange, signal?: AbortSignal) => apiGet<KpiReport>(`/kpis?range=${range}`, signal)
 export const fetchUsers = (signal?: AbortSignal) => apiGet<UserSummary[]>('/users', signal)
 
 export type WorkOrderFilters = { status?: WorkOrderStatus; machineId?: number; assigneeId?: number }

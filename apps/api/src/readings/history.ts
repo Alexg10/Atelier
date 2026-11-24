@@ -11,11 +11,16 @@ const rangeConfig: Record<ReadingRange, { durationMs: number; bucketSeconds: num
   '7d': { durationMs: 7 * 24 * HOUR_MS, bucketSeconds: 2 * 60 * 60 }, // 84 points de 2 h
 }
 
+/** Début de la période : la même définition de « 24 h » pour les courbes et pour les KPI. */
+export function rangeStart(range: ReadingRange, now = new Date()): Date {
+  return new Date(now.getTime() - rangeConfig[range].durationMs)
+}
+
 type BucketRow = { bucket: Date; temperature: number | null; vibration: number | null; rate: number | null }
 
 export async function readingHistory(machineId: number, range: ReadingRange, now = new Date()): Promise<ReadingHistory> {
-  const { durationMs, bucketSeconds } = rangeConfig[range]
-  const from = new Date(now.getTime() - durationMs)
+  const { bucketSeconds } = rangeConfig[range]
+  const from = rangeStart(range, now)
 
   // bins : tous les intervalles de la période (generate_series), même ceux sans relevé.
   // stats : date_bin arrondit chaque timestamp au début de son intervalle ; GROUP BY fait une ligne par intervalle.
