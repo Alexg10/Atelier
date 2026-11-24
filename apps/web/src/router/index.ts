@@ -57,6 +57,13 @@ export const router = createRouter({
       }),
       meta: { title: 'Nouvel ordre de maintenance' },
     },
+    {
+      path: '/floor',
+      name: 'floor',
+      // Lazy loading indispensable ici : Three.js pèse plusieurs centaines de Ko, inutile de les charger pour le dashboard.
+      component: () => import('../views/Floor3DView.vue'),
+      meta: { title: 'Vue 3D' },
+    },
     // Toute URL inconnue : le paramètre pathMatch capture le chemin entier.
     {
       path: '/:pathMatch(.*)*',

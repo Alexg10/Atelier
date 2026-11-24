@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
+import { templateCompilerOptions } from '@tresjs/core'
 
 export default defineConfig({
   // Le plugin apprend à Vite à compiler les fichiers .vue (SFC) en JavaScript.
-  plugins: [vue(), tailwindcss()],
+  // templateCompilerOptions : apprend au compilateur que <TresMesh>, <TresBoxGeometry>… sont des objets Three.js, pas des composants à résoudre.
+  plugins: [vue({ ...templateCompilerOptions }), tailwindcss()],
   server: {
     // En dev, /api/* est relayé vers l'API Fastify : même origine pour le navigateur, donc pas de CORS.
     proxy: {

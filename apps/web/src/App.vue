@@ -28,6 +28,7 @@ onUnmounted(liveStore.stop)
         <!-- :to accepte une route nommée : si le chemin change un jour, les liens restent valides. -->
         <NavLink :to="{ name: 'dashboard' }" label="Tableau de bord" />
         <NavLink :to="{ name: 'work-orders' }" label="Ordres de maintenance" />
+        <NavLink :to="{ name: 'floor' }" label="Vue 3D" />
       </nav>
 
       <div class="flex items-center gap-3">
