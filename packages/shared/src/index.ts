@@ -31,6 +31,7 @@ export type MachineOverview = {
   thresholds: Thresholds
   posX: number
   posZ: number
+  /** Orientation dans la vue 3D, en degrés autour de l'axe vertical. */
   rotation: number
   lastReading: ReadingValues | null
   openAlertCount: number

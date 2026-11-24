@@ -19,3 +19,12 @@
   --color-health-fault: #dc2626;
   --color-health-fault-soft: #fee2e2;
 }
+
+/* Vue 3D : sol blanc cassé et machines grises, pour que seule la Health apporte de la couleur.
+   static : Tailwind n'émet d'habitude que les variables utilisées dans des classes ; celles-ci ne sont lues que par Three.js. */
+@theme static {
+  --color-floor: #fafaf9;
+  --color-machine: #f4f4f1;
+  --color-machine-detail: #c6c5c1;
+  --color-machine-dark: #56565c;
+}
