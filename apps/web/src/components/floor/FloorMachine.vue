@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, type Component } from 'vue'
+import { computed, ref, shallowRef, type Component } from 'vue'
 import { useLoop } from '@tresjs/core'
 import { Html } from '@tresjs/cientos'
 import type { MachineHealth, MachineOverview, MachineType } from '@atelier/shared'
@@ -32,6 +32,13 @@ const models: Record<MachineType, Component> = {
   conveyor: ConveyorModel,
   robot: RobotModel,
   oven: OvenModel,
+}
+
+// État local : seule cette machine a besoin de savoir qu'elle est survolée (pour déplier son étiquette).
+const hovered = ref(false)
+function setHovered(value: boolean) {
+  hovered.value = value
+  emit('hover', value ? props.machine.id : null)
 }
 
 const size = computed(() => machineSizes[props.machine.type])
@@ -74,8 +81,8 @@ onBeforeRender(({ elapsed }) => {
     :position="[machine.posX, 0, machine.posZ]"
     :rotation="[0, degreesToRadians(machine.rotation), 0]"
     @click="emit('select', machine.id)"
-    @pointerenter="emit('hover', machine.id)"
-    @pointerleave="emit('hover', null)"
+    @pointerenter="setHovered(true)"
+    @pointerleave="setHovered(false)"
   >
     <!-- Le liseré de Health : une fine plaque lumineuse qui dépasse à peine du socle. C'est la seule couleur de la machine.
          emissive : la couleur que le matériau émet de lui-même, visible même dans l'ombre. -->
@@ -98,9 +105,15 @@ onBeforeRender(({ elapsed }) => {
     </TresMesh>
 
     <!-- Html : un élément du DOM, superposé au canvas et repositionné à chaque image pour suivre ce point de la scène.
-         pointer-events none : l'étiquette ne bloque pas le clic sur la machine en dessous. -->
-    <Html :position="[0, PLINTH_HEIGHT + size[1] + 0.7, 0]" center pointer-events="none" :z-index-range="[10, 0]">
-      <FloorMachineLabel :machine="machine" />
+         pointer-events none : l'étiquette ne bloque pas le clic sur la machine en dessous.
+         z-index-range : la carte survolée passe au-dessus des autres étiquettes. -->
+    <Html
+      :position="[0, PLINTH_HEIGHT + size[1] + 0.5, 0]"
+      center
+      pointer-events="none"
+      :z-index-range="hovered ? [30, 20] : [10, 0]"
+    >
+      <FloorMachineLabel :machine="machine" :expanded="hovered" />
     </Html>
   </TresGroup>
 </template>
