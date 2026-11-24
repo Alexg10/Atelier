@@ -12,9 +12,12 @@
     "dev:sim": "pnpm --filter @atelier/simulator dev",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @atelier/api db:migrate",
     "db:seed": "pnpm --filter @atelier/api db:seed",
+    "typecheck": "pnpm -r typecheck",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "build": "pnpm --filter @atelier/web build"
   },
   "devDependencies": {
     "vitest": "^5.1.1"

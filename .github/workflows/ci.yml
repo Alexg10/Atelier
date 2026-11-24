@@ -1,0 +1,46 @@
+# Intégration continue : à chaque push et pull request, on vérifie les types, on lance les tests et on construit le front.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    # Un Postgres jetable, le temps du job : les tests d'intégration de l'API tournent sur une vraie base.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: atelier
+          POSTGRES_PASSWORD: atelier
+          POSTGRES_DB: atelier
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atelier"
+          --health-interval 5s
+          --health-retries 10
+
+    env:
+      # Lu par prisma.config.ts à l'installation (prisma generate) ; les tests, eux, utilisent TEST_DATABASE_URL.
+      DATABASE_URL: postgresql://atelier:atelier@localhost:5432/atelier
+      TEST_DATABASE_URL: postgresql://atelier:atelier@localhost:5432/atelier_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # La version de pnpm vient du champ packageManager de package.json, celle de Node du fichier .nvmrc.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test:run
+      - run: pnpm build
