@@ -92,8 +92,10 @@ function openMachine(machineId: number) {
   </div>
 
   <!-- Le canvas prend la taille de son parent : c'est ce div qui la fixe.
-       relative : les étiquettes <Html> sont en position absolue, elles se repèrent sur ce conteneur. -->
-  <div class="relative mt-8 h-[70vh] overflow-hidden rounded-3xl" :class="{ 'cursor-pointer': hovering }">
+       relative : les étiquettes <Html> sont en position absolue, elles se repèrent sur ce conteneur.
+       Pas d'overflow-hidden : la carte d'une machine du haut doit pouvoir dépasser du cadre, comme une infobulle.
+       [&_canvas]:rounded-3xl arrondit donc le canvas lui-même (variante Tailwind : « les <canvas> à l'intérieur »). -->
+  <div class="relative mt-8 h-[70vh] [&_canvas]:rounded-3xl" :class="{ 'cursor-pointer': hovering }">
     <!-- v-if : on attend les machines pour calculer l'emprise (Math.min d'une liste vide donne Infinity).
          shadows + PCFShadowMap : des ombres portées, filtrées pour adoucir leurs bords.
          NeutralToneMapping : garde les blancs blancs (le réglage par défaut de TresJS les ternit un peu). -->
