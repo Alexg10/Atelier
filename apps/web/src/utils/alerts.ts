@@ -1,4 +1,5 @@
 import type { AlertSummary, AlertType } from '@atelier/shared'
+import { formatSeconds } from './format'
 
 export const alertTypeLabels: Record<AlertType, string> = {
   temperature: 'Surchauffe',
@@ -15,11 +16,7 @@ export function formatTriggeringValue(alert: AlertSummary): string | null {
   return `${Math.round(alert.value * 10) / 10} ${alertUnits[alert.type]}`
 }
 
-/** Durée lisible : « 45 s », « 12 min », « 2 h 05 ». */
+/** Durée de l'alerte, de son ouverture à son retour à la normale. */
 export function formatDuration(fromIso: string, toIso: string): string {
-  const seconds = Math.max(0, Math.round((Date.parse(toIso) - Date.parse(fromIso)) / 1000))
-  if (seconds < 60) return `${seconds} s`
-  const minutes = Math.round(seconds / 60)
-  if (minutes < 60) return `${minutes} min`
-  return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}`
+  return formatSeconds((Date.parse(toIso) - Date.parse(fromIso)) / 1000)
 }

@@ -7,8 +7,11 @@ import { deleteWorkOrder, fetchUsers, fetchWorkOrders, updateWorkOrder } from '.
 import FilterPill from '../components/FilterPill.vue'
 import AssigneeSelect from '../components/AssigneeSelect.vue'
 import StatusSelect from '../components/StatusSelect.vue'
+import WorkOrderBoard from '../components/WorkOrderBoard.vue'
 import BaseBadge from '../components/ui/BaseBadge.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
+import BaseTabPanel from '../components/ui/BaseTabPanel.vue'
+import BaseTabs from '../components/ui/BaseTabs.vue'
 import DataTable from '../components/ui/DataTable.vue'
 import type { Column } from '../components/ui/dataTable'
 import { useAsyncData } from '../composables/useAsyncData'
@@ -30,6 +33,13 @@ const { data: users } = useAsyncData(
 const { machines } = storeToRefs(useMachinesStore())
 
 const actionError = ref<string | null>(null)
+
+// Deux présentations des mêmes données : la liste pour filtrer et éditer, le kanban pour faire avancer le travail.
+const view = ref('list')
+const viewTabs = [
+  { id: 'list', label: 'Liste' },
+  { id: 'board', label: 'Kanban' },
+]
 
 // La structure du tableau : les cellules simples se décrivent ici (value), les riches passent par des slots.
 const columns: Column<WorkOrderSummary>[] = [
@@ -160,62 +170,69 @@ async function confirmRemoval() {
     <p class="mt-0.5 text-stone-500">{{ error }}</p>
   </div>
 
-  <!-- DataTable gère la structure (en-têtes, lignes, vide, chargement) ; chaque #cell-xxx décide du rendu d'une colonne.
-       { row } est la ligne que DataTable passe au slot, typée WorkOrderSummary grâce au generic. -->
-  <DataTable
-    v-else
-    class="mt-6"
-    :rows="workOrders"
-    :columns="columns"
-    :loading="loading"
-    :row-class="(workOrder) => (workOrder.status === 'done' ? 'text-stone-400' : 'text-stone-600')"
-  >
-    <template #cell-title="{ row }">
-      <span class="font-medium" :class="{ 'text-ink': row.status !== 'done' }">{{ row.title }}</span>
-      <BaseBadge v-if="row.alertId" class="ml-1.5">depuis une alerte</BaseBadge>
-    </template>
-
-    <template #cell-machine="{ row }">
-      <RouterLink :to="{ name: 'machine-detail', params: { id: row.machineId } }" class="text-brand hover:underline">
-        {{ row.machineName }}
-      </RouterLink>
-    </template>
-
-    <template #cell-priority="{ row }">
-      <span :class="{ 'font-semibold text-ink': row.priority === 'high' && row.status !== 'done' }">
-        {{ workOrderPriorityLabels[row.priority] }}
-      </span>
-    </template>
-
-    <!-- :model-value + @update:model-value (et non v-model) : le parent applique le changement de façon optimiste. -->
-    <template #cell-status="{ row }">
-      <StatusSelect :model-value="row.status" @update:model-value="(status) => onUpdate(row, { status })" />
-    </template>
-
-    <template #cell-assignee="{ row }">
-      <AssigneeSelect
-        :model-value="row.assignee?.id ?? null"
-        :users="users ?? []"
-        :disabled="row.status === 'done'"
-        @update:model-value="(assigneeId) => onUpdate(row, { assigneeId })"
-      />
-    </template>
-
-    <template #cell-actions="{ row }">
-      <button
-        v-if="row.status === 'todo'"
-        type="button"
-        class="text-xs font-medium text-stone-400 hover:text-ink"
-        @click="pendingRemoval = row"
+  <BaseTabs v-else v-model="view" :tabs="viewTabs" class="mt-6">
+    <BaseTabPanel id="list">
+      <!-- DataTable gère la structure (en-têtes, lignes, vide, chargement) ; chaque #cell-xxx décide du rendu d'une colonne.
+           { row } est la ligne que DataTable passe au slot, typée WorkOrderSummary grâce au generic. -->
+      <DataTable
+        :rows="workOrders"
+        :columns="columns"
+        :loading="loading"
+        :row-class="(workOrder) => (workOrder.status === 'done' ? 'text-stone-400' : 'text-stone-600')"
       >
-        Supprimer
-      </button>
-    </template>
+        <template #cell-title="{ row }">
+          <span class="font-medium" :class="{ 'text-ink': row.status !== 'done' }">{{ row.title }}</span>
+          <BaseBadge v-if="row.alertId" class="ml-1.5">depuis une alerte</BaseBadge>
+        </template>
 
-    <template #empty>
-      {{ hasFilters ? 'Aucun ordre ne correspond à ces filtres.' : 'Aucun ordre de maintenance.' }}
-    </template>
-  </DataTable>
+        <template #cell-machine="{ row }">
+          <RouterLink :to="{ name: 'machine-detail', params: { id: row.machineId } }" class="text-brand hover:underline">
+            {{ row.machineName }}
+          </RouterLink>
+        </template>
+
+        <template #cell-priority="{ row }">
+          <span :class="{ 'font-semibold text-ink': row.priority === 'high' && row.status !== 'done' }">
+            {{ workOrderPriorityLabels[row.priority] }}
+          </span>
+        </template>
+
+        <!-- :model-value + @update:model-value (et non v-model) : le parent applique le changement de façon optimiste. -->
+        <template #cell-status="{ row }">
+          <StatusSelect :model-value="row.status" @update:model-value="(status) => onUpdate(row, { status })" />
+        </template>
+
+        <template #cell-assignee="{ row }">
+          <AssigneeSelect
+            :model-value="row.assignee?.id ?? null"
+            :users="users ?? []"
+            :disabled="row.status === 'done'"
+            @update:model-value="(assigneeId) => onUpdate(row, { assigneeId })"
+          />
+        </template>
+
+        <template #cell-actions="{ row }">
+          <button
+            v-if="row.status === 'todo'"
+            type="button"
+            class="text-xs font-medium text-stone-400 hover:text-ink"
+            @click="pendingRemoval = row"
+          >
+            Supprimer
+          </button>
+        </template>
+
+        <template #empty>
+          {{ hasFilters ? 'Aucun ordre ne correspond à ces filtres.' : 'Aucun ordre de maintenance.' }}
+        </template>
+      </DataTable>
+    </BaseTabPanel>
+
+    <BaseTabPanel id="board">
+      <!-- Le kanban réutilise la même mise à jour optimiste que le select de statut de la liste. -->
+      <WorkOrderBoard :work-orders="workOrders ?? []" @move="(workOrder, status) => onUpdate(workOrder, { status })" />
+    </BaseTabPanel>
+  </BaseTabs>
 
   <!-- La modale est déclarée ici (là où vivent son état et ses actions), mais son HTML est téléporté dans <body>. -->
   <BaseModal v-model:open="removalOpen" title="Supprimer cet ordre ?">

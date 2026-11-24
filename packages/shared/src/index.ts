@@ -45,6 +45,7 @@ export function computeHealth(status: MachineStatus | undefined, openAlertCount:
 }
 
 export * from './profiles.ts'
+export * from './kpi.ts'
 
 export type AlertType = 'temperature' | 'vibration' | 'rate' | 'fault'
 
@@ -66,7 +67,10 @@ export type StreamEvents = {
   'alert-cleared': AlertSummary
 }
 
-/** Périodes proposées sur la fiche machine. */
+/** Un Reading toutes les 5 s par Machine : le rythme du simulateur, et la durée que représente chaque Reading. */
+export const readingIntervalSeconds = 5
+
+/** Périodes proposées sur la fiche machine et pour les KPI. */
 export const readingRanges = ['1h', '24h', '7d'] as const
 export type ReadingRange = (typeof readingRanges)[number]
 
